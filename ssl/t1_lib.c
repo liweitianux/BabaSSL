@@ -1341,12 +1341,18 @@ int ssl_cipher_disabled(const SSL *s, const SSL_CIPHER *c, int op, int ecdhe)
         int min_tls = c->min_tls;
 
 #ifndef OPENSSL_NO_NTLS
-        /*
-         * NTLS cipher can only use in NTLS
-         */
-        if (min_tls == NTLS_VERSION)
-            if (s->s3->tmp.max_ver != NTLS_VERSION)
-                return 1;
+        if (min_tls == NTLS_VERSION) {
+            if (s->enable_ntls) {
+                /*
+                 * Allow NTLS ciphers in TLS, which is required to support
+                 * the TLS->NTLS negotiation and switching.
+                 */
+                return !ssl_security(s, op, c->strength_bits, 0, (void *)c);
+            } else {
+                if (s->s3->tmp.max_ver != NTLS_VERSION)
+                    return 1;
+            }
+        }
 #endif
 
         /*
