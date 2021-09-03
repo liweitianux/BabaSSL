@@ -605,3 +605,4 @@ SSL_add_cert_compression_alg            20027	1_1_1h	EXIST::FUNCTION:CERT_COMPRE
 SSL_CTX_add_cert_compression_alg        20028	1_1_1h	EXIST::FUNCTION:CERT_COMPRESSION
 SSL_get_cert_compression_compress_id    20029	1_1_1h	EXIST::FUNCTION:CERT_COMPRESSION
 SSL_get_cert_compression_decompress_id  20030	1_1_1h	EXIST::FUNCTION:CERT_COMPRESSION
+SSL_switch_to_ntls                      20031	1_1_1h	EXIST::FUNCTION:NTLS,SM2,TLS2NTLS

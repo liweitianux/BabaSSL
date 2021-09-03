@@ -7,6 +7,9 @@
  * https://www.openssl.org/source/license.html
  */
 
+#ifndef OSSL_STATEM_STATEM_H
+#define OSSL_STATEM_STATEM_H
+
 /*****************************************************************************
  *                                                                           *
  * These enums should be considered PRIVATE to the state machine. No         *
@@ -162,3 +165,5 @@ __owur int ossl_statem_export_early_allowed(SSL *s);
 
 /* Flush the write BIO */
 int statem_flush(SSL *s);
+
+#endif /* OSSL_STATEM_STATEM_H */

@@ -472,6 +472,10 @@ global_session_recover:
             if (ssret == SUB_STATE_FINISHED) {
                 st->state = MSG_FLOW_WRITING;
                 init_write_state_machine(s);
+#if !defined(OPENSSL_NO_NTLS) && !defined(OPENSSL_NO_TLS2NTLS)
+            } else if (ssret == SUB_STATE_END_HANDSHAKE) {
+                st->state = MSG_FLOW_FINISHED;
+#endif
 #ifndef OPENSSL_NO_GLOBAL_SESSION_CACHE
             } else if (ssret == SSL_ERROR_WANT_SESSION_RESULT) {
                 s->rwstate = SSL_SESS_GLOBAL_LOOKUP;
@@ -685,6 +689,37 @@ static SUB_STATE_RETURN read_state_machine(SSL *s)
                 return SUB_STATE_ERROR;
             }
 
+#if !defined(OPENSSL_NO_NTLS) && !defined(OPENSSL_NO_TLS2NTLS)
+            /*
+             * Implement the TLS->NTLS switch mechanism.
+             * On the client side, if receive an NTLS ServerHello message,
+             * switch to NTLS.
+             */
+            if (st->hand_state == TLS_ST_CR_SRVR_HELLO && s->enable_ntls) {
+                unsigned int sversion;
+
+                if (!PACKET_peek_net_2(&pkt, &sversion)) {
+                    SSLfatal(s, SSL_AD_DECODE_ERROR, SSL_F_READ_STATE_MACHINE,
+                             SSL_R_LENGTH_MISMATCH);
+                    return SUB_STATE_ERROR;
+                }
+
+                if (sversion == NTLS1_1_VERSION) {
+#ifdef SSL_DEBUG
+                    printf("Switch client to NTLS.\n");
+#endif
+                    s->switch_to_ntls = 1;
+                    s->method = NTLS_client_method();
+                    s->version = NTLS_VERSION;
+                    s->client_version = NTLS_VERSION;
+                    s->session->ssl_version = NTLS_VERSION;
+                    ret = state_machine_ntls(s, 0 /* server */);
+                    return (ret == 1) ? SUB_STATE_END_HANDSHAKE
+                                      : SUB_STATE_ERROR;
+                }
+            }
+#endif
+
             ret = process_message(s, &pkt);
 
             /* Discard the packet data */
@@ -732,6 +767,26 @@ static SUB_STATE_RETURN read_state_machine(SSL *s)
                 if (SSL_IS_DTLS(s)) {
                     dtls1_stop_timer(s);
                 }
+#if !defined(OPENSSL_NO_NTLS) && !defined(OPENSSL_NO_TLS2NTLS)
+                /*
+                 * Implement the TLS->NTLS switch mechanism.
+                 * If it's decided to switch to NTLS in the TLS ClientHello
+                 * callback, do the switch here for the server side.
+                 */
+                if (st->hand_state == TLS_ST_SR_CLNT_HELLO
+                        && s->switch_to_ntls) {
+#ifdef SSL_DEBUG
+                    printf("Switch server to NTLS.\n");
+#endif
+                    s->method = NTLS_server_method();
+                    s->version = NTLS_VERSION;
+                    s->client_version = NTLS_VERSION;
+                    s->session->ssl_version = NTLS_VERSION;
+                    ret = state_machine_ntls(s, 1 /* server */);
+                    return (ret == 1) ? SUB_STATE_END_HANDSHAKE
+                                      : SUB_STATE_ERROR;
+                }
+#endif
                 return SUB_STATE_FINISHED;
 
 #ifndef OPENSSL_NO_GLOBAL_SESSION_CACHE

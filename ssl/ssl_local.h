@@ -1607,6 +1607,10 @@ struct ssl_st {
 
 # ifndef OPENSSL_NO_NTLS
     int enable_ntls;
+#  ifndef OPENSSL_NO_TLS2NTLS
+    /* Whether switch from TLS to NTLS just after processing ClientHello? */
+    int switch_to_ntls;
+#  endif
 # endif
 
 #ifndef OPENSSL_NO_SM2

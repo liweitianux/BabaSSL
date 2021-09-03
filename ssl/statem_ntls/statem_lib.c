@@ -1011,6 +1011,22 @@ int tls_get_message_body_ntls(SSL *s, size_t *len)
 
     p = s->init_msg;
     n = s->s3->tmp.message_size - s->init_num;
+
+#ifndef OPENSSL_NO_TLS2NTLS
+    /*
+     * After switching client from TLS to NTLS at TLS_ST_CR_SRVR_HELLO
+     * stage and READ_STATE_BODY state, this function is called *again*.
+     * Check for this case and return here, avoiding messing up the
+     * finish MAC calculation.
+     */
+    if (n == 0
+            && s->switch_to_ntls
+            && *(s->init_buf->data) == SSL3_MT_SERVER_HELLO) {
+        *len = s->init_num;
+        return 1;
+    }
+#endif
+
     while (n > 0) {
         i = s->method->ssl_read_bytes(s, SSL3_RT_HANDSHAKE, NULL,
                                       &p[s->init_num], n, 0, &readbytes);

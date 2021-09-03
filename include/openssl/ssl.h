@@ -1831,6 +1831,9 @@ void SSL_CTX_enable_ntls(SSL_CTX *ctx);
 void SSL_CTX_disable_ntls(SSL_CTX *ctx);
 void SSL_enable_ntls(SSL *s);
 void SSL_disable_ntls(SSL *s);
+#  ifndef OPENSSL_NO_TLS2NTLS
+void SSL_switch_to_ntls(SSL *s);
+#  endif
 # endif
 
 # ifndef OPENSSL_NO_SM2

@@ -2,6 +2,11 @@
  * Copyright 2019 The BabaSSL Project Authors. All Rights Reserved.
  */
 
+#ifndef OSSL_STATEM_NTLS_STATEM_H
+#define OSSL_STATEM_NTLS_STATEM_H
+
+#include "../statem/statem.h"
+
 /*****************************************************************************
  *                                                                           *
  * These enums should be considered PRIVATE to the state machine. No         *
@@ -15,72 +20,72 @@
 
 typedef enum {
     /* Something went wrong */
-    WORK_ERROR_NTLS,
+    WORK_ERROR_NTLS = WORK_ERROR,
     /* We're done working and there shouldn't be anything else to do after */
-    WORK_FINISHED_STOP_NTLS,
+    WORK_FINISHED_STOP_NTLS = WORK_FINISHED_STOP,
     /* We're done working move onto the next thing */
-    WORK_FINISHED_CONTINUE_NTLS,
+    WORK_FINISHED_CONTINUE_NTLS = WORK_FINISHED_CONTINUE,
     /* We're working on phase A */
-    WORK_MORE_A_NTLS,
+    WORK_MORE_A_NTLS = WORK_MORE_A,
     /* We're working on phase B */
-    WORK_MORE_B_NTLS,
+    WORK_MORE_B_NTLS = WORK_MORE_B,
     /* We're working on phase C */
-    WORK_MORE_C_NTLS
+    WORK_MORE_C_NTLS = WORK_MORE_C
 } WORK_STATE_NTLS;
 
 /* Write transition return codes */
 typedef enum {
     /* Something went wrong */
-    WRITE_TRAN_ERROR_NTLS,
+    WRITE_TRAN_ERROR_NTLS = WRITE_TRAN_ERROR,
     /* A transition was successfully completed and we should continue */
-    WRITE_TRAN_CONTINUE_NTLS,
+    WRITE_TRAN_CONTINUE_NTLS = WRITE_TRAN_CONTINUE,
     /* There is no more write work to be done */
-    WRITE_TRAN_FINISHED_NTLS
+    WRITE_TRAN_FINISHED_NTLS = WRITE_TRAN_FINISHED
 } WRITE_TRAN_NTLS;
 
 /* Message flow states */
 typedef enum {
     /* No handshake in progress */
-    MSG_FLOW_UNINITED_NTLS,
+    MSG_FLOW_UNINITED_NTLS = MSG_FLOW_UNINITED,
     /* A permanent error with this connection */
-    MSG_FLOW_ERROR_NTLS,
+    MSG_FLOW_ERROR_NTLS = MSG_FLOW_ERROR,
     /* We are reading messages */
-    MSG_FLOW_READING_NTLS,
+    MSG_FLOW_READING_NTLS = MSG_FLOW_READING,
     /* We are writing messages */
-    MSG_FLOW_WRITING_NTLS,
+    MSG_FLOW_WRITING_NTLS = MSG_FLOW_WRITING,
     /* Handshake has finished */
-    MSG_FLOW_FINISHED_NTLS
+    MSG_FLOW_FINISHED_NTLS = MSG_FLOW_FINISHED
 } MSG_FLOW_STATE_NTLS;
 
 /* Read states */
 typedef enum {
-    READ_STATE_HEADER_NTLS,
-    READ_STATE_BODY_NTLS,
-    READ_STATE_POST_PROCESS_NTLS
+    READ_STATE_HEADER_NTLS = READ_STATE_HEADER,
+    READ_STATE_BODY_NTLS = READ_STATE_BODY,
+    READ_STATE_POST_PROCESS_NTLS = READ_STATE_POST_PROCESS
 } READ_STATE_NTLS;
 
 /* Write states */
 typedef enum {
-    WRITE_STATE_TRANSITION_NTLS,
-    WRITE_STATE_PRE_WORK_NTLS,
-    WRITE_STATE_SEND_NTLS,
-    WRITE_STATE_POST_WORK_NTLS
+    WRITE_STATE_TRANSITION_NTLS = WRITE_STATE_TRANSITION,
+    WRITE_STATE_PRE_WORK_NTLS = WRITE_STATE_PRE_WORK,
+    WRITE_STATE_SEND_NTLS = WRITE_STATE_SEND,
+    WRITE_STATE_POST_WORK_NTLS = WRITE_STATE_POST_WORK
 } WRITE_STATE_NTLS;
 
 typedef enum {
     /* The enc_write_ctx can be used normally */
-    ENC_WRITE_STATE_VALID_NTLS,
+    ENC_WRITE_STATE_VALID_NTLS = ENC_WRITE_STATE_VALID,
     /* The enc_write_ctx cannot be used */
-    ENC_WRITE_STATE_INVALID_NTLS,
+    ENC_WRITE_STATE_INVALID_NTLS = ENC_WRITE_STATE_INVALID,
     /* Write alerts in plaintext, but otherwise use the enc_write_ctx */
-    ENC_WRITE_STATE_WRITE_PLAIN_ALERTS_NTLS
+    ENC_WRITE_STATE_WRITE_PLAIN_ALERTS_NTLS = ENC_WRITE_STATE_WRITE_PLAIN_ALERTS
 } ENC_WRITE_STATES_NTLS;
 
 typedef enum {
     /* The enc_read_ctx can be used normally */
-    ENC_READ_STATE_VALID_NTLS,
+    ENC_READ_STATE_VALID_NTLS = ENC_READ_STATE_VALID,
     /* We may receive encrypted or plaintext alerts */
-    ENC_READ_STATE_ALLOW_PLAIN_ALERTS_NTLS
+    ENC_READ_STATE_ALLOW_PLAIN_ALERTS_NTLS = ENC_READ_STATE_ALLOW_PLAIN_ALERTS
 } ENC_READ_STATES_NTLS;
 
 /*****************************************************************************
@@ -155,3 +160,5 @@ int statem_flush_ntls(SSL *s);
 int state_machine_ntls(SSL *s, int server);
 
 int SSL_connection_is_ntls(SSL *s, int is_server);
+
+#endif /* OSSL_STATEM_NTLS_STATEM_H */

@@ -4172,6 +4172,9 @@ retry:
 
         /* Skip ciphers not supported by the protocol version */
         if (!SSL_IS_DTLS(s) &&
+#if !defined(OPENSSL_NO_NTLS) && !defined(OPENSSL_NO_TLS2NTLS)
+            !s->enable_ntls &&  /* Allow NTLS ciphers in TLS (for TLS->NTLS switch) */
+#endif
             ((s->version < c->min_tls) || (s->version > c->max_tls)))
             continue;
         if (SSL_IS_DTLS(s) &&
@@ -4212,6 +4215,13 @@ retry:
             if (s->srp_ctx.srp_Mask & SSL_kSRP) {
                 mask_k |= SSL_kSRP;
                 mask_a |= SSL_aSRP;
+            }
+#endif
+#if !defined(OPENSSL_NO_NTLS) && !defined(OPENSSL_NO_TLS2NTLS)
+            /* Allow NTLS ciphers in TLS (for TLS->NTLS switch) */
+            if (s->enable_ntls) {
+                mask_k |= SSL_kSM2 | SSL_kSM2DHE;
+                mask_a |= SSL_aSM2;
             }
 #endif
 

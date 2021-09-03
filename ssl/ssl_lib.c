@@ -731,6 +731,9 @@ SSL *SSL_new(SSL_CTX *ctx)
     s->pha_enabled = ctx->pha_enabled;
 #ifndef OPENSSL_NO_NTLS
     s->enable_ntls = ctx->enable_ntls;
+#ifndef OPENSSL_NO_TLS2NTLS
+    s->switch_to_ntls = 0;
+#endif
 #endif
 #ifndef OPENSSL_NO_SM2
     s->enable_sm_tls13_strict = ctx->enable_sm_tls13_strict;
@@ -6330,6 +6333,16 @@ void SSL_disable_ntls(SSL *s)
 {
     s->enable_ntls = 0;
 }
+
+#ifndef OPENSSL_NO_TLS2NTLS
+/*
+ * Called in TLS ClientHello callback to switch the server side to NTLS.
+ */
+void SSL_switch_to_ntls(SSL *s)
+{
+    s->switch_to_ntls = 1;
+}
+#endif
 #endif
 
 #ifndef OPENSSL_NO_SM2
